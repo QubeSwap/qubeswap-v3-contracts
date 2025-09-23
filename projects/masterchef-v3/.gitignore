@@ -3,6 +3,7 @@ node_modules/
 **/cache/
 **/abi
 **/typechain
+**/typechain-types
 .idea
 .vscode
 .DS_Store

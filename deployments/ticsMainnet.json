@@ -1,0 +1,17 @@
+{
+  "MasterChefV3": "0x",
+  "SmartRouter": "0x",
+  "SmartRouterHelper": "0x",
+  "MixedRouteQuoterV1": "0x",
+  "QuoterV2": "0x",
+  "TokenValidator": "0x",
+  "QubeV3Factory": "0x",
+  "QubeV3PoolDeployer": "0x",
+  "SwapRouter": "0x",
+  "V3Migrator": "0x",
+  "TickLens": "0x",
+  "NonfungibleTokenPositionDescriptor": "0x",
+  "NonfungiblePositionManager": "0x",
+  "QubeInterfaceMulticall": "0x",
+  "QubeV3LmPoolDeployer": "0x"
+}

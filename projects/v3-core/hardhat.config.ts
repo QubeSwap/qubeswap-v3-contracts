@@ -50,11 +50,7 @@ const DEFAULT_COMPILER_SETTINGS = {
   },
 }
 
-const ticsMainnet: NetworkUserConfig = {
-  url: 'https://rpc.qubetics.com/',
-  chainId: 9030,
-  accounts: [process.env.KEY_MAINNET!],
-}
+
 
 const bscTestnet: NetworkUserConfig = {
   url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
@@ -68,16 +64,16 @@ const bscMainnet: NetworkUserConfig = {
   accounts: [process.env.KEY_MAINNET!],
 }
 
-const goerli: NetworkUserConfig = {
-  url: 'https://rpc.ankr.com/eth_goerli',
-  chainId: 5,
-  accounts: [process.env.KEY_GOERLI!],
-}
-
 const eth: NetworkUserConfig = {
   url: 'https://eth.llamarpc.com',
   chainId: 1,
   accounts: [process.env.KEY_ETH!],
+}
+
+const ticsMainnet: NetworkUserConfig = {
+  url: 'https://rpc.qubetics.com/',
+  chainId: 9030,
+  accounts: [process.env.KEY_MAINNET!],
 }
 
 export default {
@@ -87,7 +83,7 @@ export default {
     },
     ...(process.env.KEY_TESTNET && { bscTestnet }),
     ...(process.env.KEY_MAINNET && { bscMainnet }),
-    ...(process.env.KEY_GOERLI && { goerli }),
+	...(process.env.KEY_MAINNET && { ticsMainnet }),
     ...(process.env.KEY_ETH && { eth }),
     // mainnet: bscMainnet,
   },

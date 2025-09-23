@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "compile": "yarn workspaces run compile",
+	"clean": "rm -rf node_modules && yarn workspaces run clean",
+	"reset": "rm -rf node_modules && yarn workspaces run reset",
     "test": "yarn workspaces run test"
   },
   "devDependencies": {

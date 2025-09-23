@@ -21,6 +21,8 @@
     "format:check": "prettier --check './**/*.{js,ts,sol}'",
     "format:write": "prettier --write './**/*.{js,ts,sol}'",
     "test": "npx hardhat test",
+	"clean": "rm -rf node_modules",
+	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
     "compile": "npx hardhat compile"
   },
   "devDependencies": {

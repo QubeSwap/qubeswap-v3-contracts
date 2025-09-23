@@ -5,6 +5,8 @@
   "license": "MIT",
   "scripts": {
     "compile": "hardhat compile",
+	"clean": "rm -rf node_modules",
+	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
     "test": "echo 'skip'"
   },
   "devDependencies": {

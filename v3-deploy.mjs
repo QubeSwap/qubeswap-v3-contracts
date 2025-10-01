@@ -3,8 +3,8 @@
 
 const networks = {
   eth: 'eth',
-  goerli: 'goerli',
   bscMainnet: 'bscMainnet',
+  ticsMainnet: 'ticsMainnet',
   bscTestnet: 'bscTestnet',
   hardhat: 'hardhat',
 }

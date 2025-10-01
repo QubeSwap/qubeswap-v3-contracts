@@ -18,12 +18,13 @@
     "!artifacts/contracts/**/*.dbg.json"
   ],
   "scripts": {
+	"compile": "npx hardhat compile",
     "format:check": "prettier --check './**/*.{js,ts,sol}'",
     "format:write": "prettier --write './**/*.{js,ts,sol}'",
-    "test": "npx hardhat test",
 	"clean": "rm -rf node_modules",
 	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
-    "compile": "npx hardhat compile"
+	"flatten_MasterChefV3": "npx hardhat flatten contracts/MasterChefV3.sol > MasterChefV3_flat.sol",
+    "test": "npx hardhat test"
   },
   "devDependencies": {
     "@chainlink/contracts": "^0.6.1",

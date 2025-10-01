@@ -26,7 +26,8 @@
     "@qubeswap/common": "*",
     "@qubeswap/v3-lm-pool": "*",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
-    "@nomiclabs/hardhat-etherscan": "^2.1.8",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
+	"@nomicfoundation/hardhat-verify": "^3.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@typechain/ethers-v5": "^10.2.0",
     "@types/chai": "^4.2.6",
@@ -53,6 +54,8 @@
     "compile": "hardhat compile",
 	"clean": "rm -rf node_modules",
 	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
+	"flatten_QubeV3Factory": "npx hardhat flatten contracts/QubeV3Factory.sol > QubeV3Factory_flat.sol",
+	"flatten_QubeV3PoolDeployer": "npx hardhat flatten contracts/QubeV3PoolDeployer.sol > QubeV3PoolDeployer_flat.sol",
     "test": "hardhat test"
   }
 }

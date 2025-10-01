@@ -7,6 +7,7 @@
     "compile": "hardhat compile",
 	"clean": "rm -rf node_modules",
 	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
+	"flatten_QubeV3LmPoolDeployer": "npx hardhat flatten contracts/QubeV3LmPoolDeployer.sol > QubeV3LmPoolDeployer_flat.sol",
     "test": "echo 'skip'"
   },
   "devDependencies": {

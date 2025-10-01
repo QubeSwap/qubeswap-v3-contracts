@@ -46,7 +46,19 @@ const config: HardhatUserConfig = {
     // mainnet: bscMainnet,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY || '',
+    apiKey: {
+      ticsMainnet: "process.env.ETHERSCAN_API_KEY", // Etherscan API key for your custom chain
+    },
+    customChains: [
+      {
+        network: "ticsMainnet", // Must match the network name in `apiKey`
+        chainId: 9030,
+        urls: {
+          apiURL: "https://evm-api.qubetics.com/", // Etherscan-compatible API URL for verification
+          browserURL: "https://ticsscan.com/", // Etherscan-compatible browser URL
+        },
+      },
+    ],
   },
   solidity: {
     compilers: [

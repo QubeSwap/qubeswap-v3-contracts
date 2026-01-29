@@ -1,4 +1,4 @@
-# QubeSwap-V3-Contracts
+# Qube V3
 
 
 ## Deployments

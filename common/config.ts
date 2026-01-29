@@ -15,7 +15,7 @@ export const configs = {
     stableFactory: '0x155a543dB75999B4a4e831656941aD653537596b',
     stableInfo: '0x4f6ba916ffb6223678F31f9b75EdF569348A4815',
     qst: '0x7F5141a80E7399C61e328C6bCf4C69Aa01738367',
-    smartRouterHelper: '0x',
+    smartRouterHelper: '0x6Fa403c048da9F900E1d30F0c40BdB8A3897dc77',
   },
   bscMainnet: {
     WNATIVE: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',

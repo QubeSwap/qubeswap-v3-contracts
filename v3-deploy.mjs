@@ -2,10 +2,11 @@
 // import 'zx/globals'
 
 const networks = {
-  eth: 'eth',
-  bscMainnet: 'bscMainnet',
+  seiMainnet: 'seiMainnet',
+  monadMainnet: 'monadMainnet',
   ticsMainnet: 'ticsMainnet',
-  bscTestnet: 'bscTestnet',
+  bscMainnet: 'bscMainnet',
+  avaxMainnet: 'avaxMainnet',
   hardhat: 'hardhat',
 }
 

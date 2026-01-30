@@ -7,6 +7,7 @@ import '@typechain/hardhat'
 import 'hardhat-watcher'
 import 'dotenv/config'
 import 'solidity-docgen'
+
 require('dotenv').config({ path: require('find-config')('.env') })
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
@@ -51,61 +52,79 @@ const DEFAULT_COMPILER_SETTINGS = {
   },
 }
 
-const bscTestnet: NetworkUserConfig = {
-  url: 'https://data-seed-prebsc-1-s1.binance.org:8545/',
-  chainId: 97,
-  accounts: [process.env.KEY_TESTNET!],
-}
-
-const bscMainnet: NetworkUserConfig = {
-  url: 'https://bsc-dataseed.binance.org/',
-  chainId: 56,
-  accounts: [process.env.KEY_MAINNET!],
-}
-
-const goerli: NetworkUserConfig = {
-  url: 'https://rpc.ankr.com/eth_goerli',
-  chainId: 5,
-  accounts: [process.env.KEY_GOERLI!],
-}
-
-const eth: NetworkUserConfig = {
-  url: 'https://eth.llamarpc.com',
-  chainId: 1,
-  accounts: [process.env.KEY_ETH!],
-}
-
-const ticsMainnet: NetworkUserConfig = {
-  url: 'https://rpc.qubetics.com/',
-  chainId: 9030,
-  accounts: [process.env.KEY_MAINNET!],
-}
-
-export default {
+const config: HardhatUserConfig = {
+  defaultNetwork: 'hardhat',
   networks: {
+    // Mainnets
     hardhat: {
       allowUnlimitedContractSize: true,
     },
-    ...(process.env.KEY_TESTNET && { bscTestnet }),
-    ...(process.env.KEY_MAINNET && { bscMainnet }),
-	...(process.env.KEY_MAINNET && { ticsMainnet }),
-    ...(process.env.KEY_ETH && { eth }),
-    // mainnet: bscMainnet,
-  },
-  etherscan: {
-    apiKey: {
-      ticsMainnet: "process.env.ETHERSCAN_API_KEY", // Etherscan API key for your custom chain
+    localhost: { timeout: 600000 },
+    seiMainnet: {
+      url: https://evm-rpc.sei-apis.com,
+      accounts: [process.env.KEY_MAINNET!]
     },
+	monadMainnet: {
+      url: https://rpc.monad.xyz,
+      accounts: [process.env.KEY_MAINNET!]
+    },
+	ticsMainnet: {
+      url: https://rpc.qubetics.com,
+      accounts: [process.env.KEY_MAINNET!]
+    },
+	bscMainnet: {
+      url: https://bsc-dataseed.binance.org,
+      accounts: [process.env.KEY_MAINNET!]
+    },
+	avaxMainnet: {
+      url: https://api.avax.network/ext/bc/C/rpc,
+      accounts: [process.env.KEY_MAINNET!]
+    },
+  },	
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY || '',
     customChains: [
-      {
-        network: "ticsMainnet", // Must match the network name in `apiKey`
+	  {
+        network: 'sei',
+        chainId: 1329,
+        urls: {
+          apiURL: process.env.SEI_API_ENDPOINT || '',
+          browserURL: process.env.SEI_EXPLORER || ''
+        }
+      },
+	  {
+        network: 'monad',
+        chainId: 143,
+        urls: {
+          apiURL: process.env.MONAD_API_ENDPOINT || '',
+          browserURL: process.env.MONAD_EXPLORER || ''
+        }
+      },
+	  {
+        network: "qubetics",
         chainId: 9030,
         urls: {
-          apiURL: "https://evm-api.qubetics.com/", // Etherscan-compatible API URL for verification
-          browserURL: "https://ticsscan.com/", // Etherscan-compatible browser URL
-        },
+          apiURL: process.env.QUBETICS_API_ENDPOINT || '',
+          browserURL: process.env.QUBETICS_EXPLORER || ''
+        }
       },
-    ],
+	  {
+        network: 'bsc',
+        chainId: 56,
+        urls: {
+          apiURL: process.env.BSC_API_ENDPOINT || '',
+          browserURL: process.env.BSC_EXPLORER || ''
+        }
+      },
+	  {
+        network: 'avalanche',
+        chainId: 43114,
+        urls: {
+          apiURL: process.env.AVALANCHE_API_ENDPOINT || '',
+          browserURL: process.env.AVALANCHE_EXPLORER || ''
+        }
+      }
+    ]
   },
   solidity: {
     compilers: [DEFAULT_COMPILER_SETTINGS],

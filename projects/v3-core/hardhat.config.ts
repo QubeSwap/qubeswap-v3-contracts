@@ -6,8 +6,8 @@ import '@typechain/hardhat'
 import 'hardhat-watcher'
 import 'dotenv/config'
 import 'solidity-docgen'
-
-require('dotenv').config({ path: require('find-config')('.env') })
+import * as dotenv from "dotenv"
+dotenv.config({ path: require("find-config")(".env") })
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: '0.7.6',
@@ -144,3 +144,5 @@ const config: HardhatUserConfig = {
     pages: 'files',
   },
 }
+
+export default config

@@ -1,11 +1,10 @@
-import { HardhatUserConfig } from 'hardhat/config'
+import type { HardhatUserConfig, NetworkUserConfig } from 'hardhat/types'
 import '@nomicfoundation/hardhat-toolbox'
 import '@typechain/hardhat'
-import 'dotenv/config'
-import { NetworkUserConfig } from 'hardhat/types'
+import * as dotenv from 'dotenv'
 import 'solidity-docgen';
 
-require('dotenv').config({ path: require('find-config')('.env') })
+dotenv.config({ path: require("find-config")(".env") })
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',

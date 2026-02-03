@@ -1,5 +1,5 @@
 {
-  "name": "qube-v3",
+  "name": "qubeswap-v3-contracts",
   "private": true,
   "workspaces": [
     "projects/*",
@@ -10,21 +10,6 @@
     "compile": "yarn workspaces run compile",
 	"clean": "rm -rf node_modules && yarn workspaces run clean",
 	"reset": "rm -rf node_modules && yarn workspaces run reset",
-	"flatten_v3_contracts1": "yarn --cwd projects/masterchef-v3 run flatten_MasterChefV3",
-	"flatten_v3_contracts2": "yarn --cwd projects/router run flatten_SmartRouter",
-	"flatten_v3_contracts21": "yarn --cwd projects/router run flatten_SmartRouterHelper",
-	"flatten_v3_contracts22": "yarn --cwd projects/router run flatten_MixedRouteQuoterV1",
-	"flatten_v3_contracts23": "yarn --cwd projects/router run flatten_QuoterV2",
-	"flatten_v3_contracts24": "yarn --cwd projects/router run flatten_TokenValidator",
-	"flatten_v3_contracts3": "yarn --cwd projects/v3-core run flatten_QubeV3Factory",
-	"flatten_v3_contracts31": "yarn --cwd projects/v3-core run flatten_QubeV3PoolDeployer",
-	"flatten_v3_contracts4": "yarn --cwd projects/v3-lm-pool run flatten_QubeV3LmPoolDeployer",
-	"flatten_v3_contracts5": "yarn --cwd projects/v3-periphery run flatten_SwapRouter",
-	"flatten_v3_contracts51": "yarn --cwd projects/v3-periphery run flatten_V3Migrator",
-	"flatten_v3_contracts52": "yarn --cwd projects/v3-periphery run flatten_TickLens",
-	"flatten_v3_contracts53": "yarn --cwd projects/v3-periphery run flatten_NonfungibleTokenPositionDescriptor",
-	"flatten_v3_contracts54": "yarn --cwd projects/v3-periphery run flatten_NonfungiblePositionManager",
-	"flatten_v3_contracts55": "yarn --cwd projects/v3-periphery run flatten_QubeInterfaceMulticall",
     "test": "yarn workspaces run test"
   },
   "devDependencies": {

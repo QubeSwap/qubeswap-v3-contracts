@@ -5,10 +5,10 @@ import '@nomiclabs/hardhat-waffle'
 import '@openzeppelin/hardhat-upgrades'
 import '@typechain/hardhat'
 import 'hardhat-watcher'
-import 'dotenv/config'
+import * as dotenv from 'dotenv'
 import 'solidity-docgen'
 
-require('dotenv').config({ path: require('find-config')('.env') })
+dotenv.config({ path: require("find-config")(".env") })
 
 const LOW_OPTIMIZER_COMPILER_SETTINGS = {
   version: '0.7.6',
@@ -30,7 +30,7 @@ const LOWEST_OPTIMIZER_COMPILER_SETTINGS = {
     evmVersion: 'istanbul',
     optimizer: {
       enabled: true,
-      runs: 1_000,
+      runs: 200,
     },
     metadata: {
       bytecodeHash: 'none',
@@ -148,3 +148,5 @@ const config: HardhatUserConfig = {
     pages: 'files',
   },
 }
+
+export default config

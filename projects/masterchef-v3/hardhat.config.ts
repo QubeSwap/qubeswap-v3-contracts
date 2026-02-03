@@ -10,9 +10,9 @@ import "hardhat-abi-exporter";
 import "hardhat-contract-sizer";
 import "solidity-coverage";
 import "solidity-docgen";
-import "dotenv/config";
+import * as dotenv from "dotenv";
 
-require("dotenv").config({ path: require("find-config")(".env") });
+dotenv.config({ path: require("find-config")(".env") });
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',

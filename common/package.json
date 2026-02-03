@@ -1,7 +1,7 @@
 {
   "name": "@qubeswap/common",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "scripts": {
     "compile": "echo 'No compile needed'",
 	"clean": "echo 'No clean needed'",

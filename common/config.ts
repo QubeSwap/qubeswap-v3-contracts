@@ -6,7 +6,7 @@ export const configs = {
     stableFactory: '0xbbD7e8B7949300f9C36BcDA83Ee4589FF955BE50',
     stableInfo: '0x187246fF29915f9733c961d288af0E6094b9e2FA',
     qst: '0x9393139435CeF1c490118e83C33A05EF2E71Fdc6',
-    smartRouterHelper: '0x',
+    smartRouterHelper: '0xe8204c528Ec4cF23002E963951e206B944De5D4b',
   },
   monadMainnet: {
     WNATIVE: '0x3bd359C1119dA7Da1D913D1C4D2B7c461115433A',
@@ -15,7 +15,7 @@ export const configs = {
     stableFactory: '0x931765421E5970dda3e3499449A67fb03f4ebD4C',
     stableInfo: '0x38Ec4aDBabfEb321D512769734e3731Ccf3a8AFf',
     qst: '0x9393139435CeF1c490118e83C33A05EF2E71Fdc6',
-    smartRouterHelper: '0x',
+    smartRouterHelper: '0x2f497aADEBFac76B865D664E6e0A76cCAC02f306',
   },
   ticsMainnet: {
     WNATIVE: '0x8A0a018caEd522B3f1501616f828f6B1819Ced22',
@@ -24,7 +24,7 @@ export const configs = {
     stableFactory: '0x83F77ec45AECd6AaA975D43d7710c5349A078B71',
     stableInfo: '0x11A51A136DE68347c9e2e76A2B1F517CE43cfc35',
     qst: '0x9393139435CeF1c490118e83C33A05EF2E71Fdc6',
-    smartRouterHelper: '0x',
+    smartRouterHelper: '0xc574F5cc099d322f2e9faCcFb7704176A160f045',
   },
   bscMainnet: {
     WNATIVE: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
@@ -33,7 +33,7 @@ export const configs = {
     stableFactory: '0x16fb89911d7B87daB56510dCB91C2027f9B020b9',
     stableInfo: '0x11A51A136DE68347c9e2e76A2B1F517CE43cfc35',
     qst: '0x9393139435CeF1c490118e83C33A05EF2E71Fdc6',
-    smartRouterHelper: '0x',
+    smartRouterHelper: '0xc574F5cc099d322f2e9faCcFb7704176A160f045',
   },
   avaxMainnet: {
     WNATIVE: '0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
@@ -42,7 +42,7 @@ export const configs = {
     stableFactory: '0x16fb89911d7B87daB56510dCB91C2027f9B020b9',
     stableInfo: '0x931765421E5970dda3e3499449A67fb03f4ebD4C',
     qst: '0x9393139435CeF1c490118e83C33A05EF2E71Fdc6',
-    smartRouterHelper: '0x',
+    smartRouterHelper: '0xaf0FA92E25C507d6D68fd98519733cB7CBC08B65',
   },
   hardhat: {
     WNATIVE: '0x0000000000000000000000000000000000000000',

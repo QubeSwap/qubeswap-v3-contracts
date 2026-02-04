@@ -1,5 +1,5 @@
 import type { HardhatUserConfig, NetworkUserConfig } from 'hardhat/types'
-import '@nomiclabs/hardhat-ethers'
+import '@nomicfoundation/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan'
 import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
@@ -60,7 +60,8 @@ const config: HardhatUserConfig = {
     },
     localhost: { timeout: 600000 },
     seiMainnet: {
-      url: "https://evm-rpc.sei-apis.com",
+      //url: "https://evm-rpc.sei-apis.com",
+	  url: "https://sei-public.nodies.app",
       accounts: [process.env.KEY_MAINNET!]
     },
 	monadMainnet: {
@@ -76,7 +77,8 @@ const config: HardhatUserConfig = {
       accounts: [process.env.KEY_MAINNET!]
     },
 	avaxMainnet: {
-      url: "https://api.avax.network/ext/bc/C/rpc",
+      //url: "https://api.avax.network/ext/bc/C/rpc",
+	  url: "https://avalanche-c-chain-rpc.publicnode.com",
       accounts: [process.env.KEY_MAINNET!]
     },
   },	
@@ -132,6 +134,10 @@ const config: HardhatUserConfig = {
       'contracts/QubeV3PoolDeployer.sol': LOWEST_OPTIMIZER_COMPILER_SETTINGS,
       'contracts/test/OutputCodeHash.sol': LOWEST_OPTIMIZER_COMPILER_SETTINGS,
     },
+  },
+  typechain: {
+    outDir: 'typechain',
+    target: 'ethers-v6'
   },
   watcher: {
     test: {

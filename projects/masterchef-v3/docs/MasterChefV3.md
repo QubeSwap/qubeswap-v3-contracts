@@ -72,13 +72,13 @@ mapping(address => uint256) v3PoolAddressPid
 
 v3PoolAddressPid[v3PoolAddress] => pid
 
-### CAKE
+### QST
 
 ```solidity
-contract IERC20 CAKE
+contract IERC20 QST
 ```
 
-Address of CAKE contract.
+Address of QST contract.
 
 ### WETH
 
@@ -437,14 +437,14 @@ _Throws if caller is not the boost contract._
 ### constructor
 
 ```solidity
-constructor(contract IERC20 _CAKE, contract INonfungiblePositionManager _nonfungiblePositionManager, address _WETH) public
+constructor(contract IERC20 _QST, contract INonfungiblePositionManager _nonfungiblePositionManager, address _WETH) public
 ```
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| _CAKE | contract IERC20 | The CAKE token contract address. |
+| _QST | contract IERC20 | The QST token contract address. |
 | _nonfungiblePositionManager | contract INonfungiblePositionManager | the NFT position manager contract address. |
 | _WETH | address |  |
 
@@ -482,7 +482,7 @@ Returns the qst per second , period end time. This is for liquidity mining pool.
 function pendingQst(uint256 _tokenId) external view returns (uint256 reward)
 ```
 
-View function for checking pending CAKE rewards.
+View function for checking pending QST rewards.
 
 _The pending qst amount is based on the last state in LMPool. The actual amount will happen whenever liquidity changes or harvest._
 
@@ -535,7 +535,7 @@ One v3 pool can only create one pool.
 function set(uint256 _pid, uint256 _allocPoint, bool _withUpdate) external
 ```
 
-Update the given pool's CAKE allocation point. Can only be called by the owner.
+Update the given pool's QST allocation point. Can only be called by the owner.
 
 #### Parameters
 
@@ -909,14 +909,14 @@ Transfer ETH in a safe way
 function _safeTransfer(address _to, uint256 _amount) internal
 ```
 
-Safe Transfer CAKE.
+Safe Transfer QST.
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| _to | address | The CAKE receiver address. |
-| _amount | uint256 | Transfer CAKE amounts. |
+| _to | address | The QST receiver address. |
+| _amount | uint256 | Transfer QST amounts. |
 
 ### receive
 

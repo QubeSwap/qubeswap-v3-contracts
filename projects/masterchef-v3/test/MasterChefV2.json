@@ -12,7 +12,7 @@
         },
         {
           "internalType": "contract IBEP20",
-          "name": "_CAKE",
+          "name": "_QST",
           "type": "address"
         },
         {
@@ -319,7 +319,7 @@
     },
     {
       "inputs": [],
-      "name": "ACC_CAKE_PRECISION",
+      "name": "ACC_QST_PRECISION",
       "outputs": [
         {
           "internalType": "uint256",
@@ -345,7 +345,7 @@
     },
     {
       "inputs": [],
-      "name": "CAKE",
+      "name": "QST",
       "outputs": [
         {
           "internalType": "contract IBEP20",
@@ -358,7 +358,7 @@
     },
     {
       "inputs": [],
-      "name": "CAKE_RATE_TOTAL_PRECISION",
+      "name": "QST_RATE_TOTAL_PRECISION",
       "outputs": [
         {
           "internalType": "uint256",
@@ -371,7 +371,7 @@
     },
     {
       "inputs": [],
-      "name": "MASTERCHEF_CAKE_PER_BLOCK",
+      "name": "MASTERCHEF_QST_PER_BLOCK",
       "outputs": [
         {
           "internalType": "uint256",

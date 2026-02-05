@@ -61,8 +61,8 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
     /// @notice v3PoolAddressPid[v3PoolAddress] => pid
     mapping(address => uint256) public v3PoolAddressPid;
 
-    /// @notice Address of CAKE contract.
-    IERC20 public immutable CAKE;
+    /// @notice Address of QST contract.
+    IERC20 public immutable QST;
 
     /// @notice Address of WETH contract.
     address public immutable WETH;
@@ -184,10 +184,10 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
         _;
     }
 
-    /// @param _CAKE The CAKE token contract address.
+    /// @param _QST The QST token contract address.
     /// @param _nonfungiblePositionManager the NFT position manager contract address.
-    constructor(IERC20 _CAKE, INonfungiblePositionManager _nonfungiblePositionManager, address _WETH) {
-        CAKE = _CAKE;
+    constructor(IERC20 _QST, INonfungiblePositionManager _nonfungiblePositionManager, address _WETH) {
+        QST = _QST;
         nonfungiblePositionManager = _nonfungiblePositionManager;
         WETH = _WETH;
     }
@@ -216,7 +216,7 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
         endTime = latestPeriodEndTime;
     }
 
-    /// @notice View function for checking pending CAKE rewards.
+    /// @notice View function for checking pending QST rewards.
     /// @dev The pending qst amount is based on the last state in LMPool. The actual amount will happen whenever liquidity changes or harvest.
     /// @param _tokenId Token Id of NFT.
     /// @return reward Pending reward.
@@ -249,7 +249,7 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
 
     function setReceiver(address _receiver) external onlyOwner {
         if (_receiver == address(0)) revert ZeroAddress();
-        if (CAKE.allowance(_receiver, address(this)) != type(uint256).max) revert();
+        if (QST.allowance(_receiver, address(this)) != type(uint256).max) revert();
         receiver = _receiver;
         emit NewReceiver(_receiver);
     }
@@ -297,7 +297,7 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
         emit AddPool(poolLength, _allocPoint, _v3Pool, lmPool);
     }
 
-    /// @notice Update the given pool's CAKE allocation point. Can only be called by the owner.
+    /// @notice Update the given pool's QST allocation point. Can only be called by the owner.
     /// @param _pid The id of the pool. See `poolInfo`.
     /// @param _allocPoint New number of allocation points for the pool.
     /// @param _withUpdate Whether call "massUpdatePools" operation.
@@ -629,7 +629,7 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
     function transferToken(address _token, address _to) internal {
         uint256 balance = IERC20(_token).balanceOf(address(this));
         // Need to reduce qstAmountBelongToMC.
-        if (_token == address(CAKE)) {
+        if (_token == address(QST)) {
             unchecked {
                 // In fact balance should always be greater than or equal to qstAmountBelongToMC, but in order to avoid any unknown issue, we added this check.
                 if (balance >= qstAmountBelongToMC) {
@@ -673,7 +673,7 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
     function sweepToken(address token, uint256 amountMinimum, address recipient) external nonReentrant {
         uint256 balanceToken = IERC20(token).balanceOf(address(this));
         // Need to reduce qstAmountBelongToMC.
-        if (token == address(CAKE)) {
+        if (token == address(QST)) {
             unchecked {
                 // In fact balance should always be greater than or equal to qstAmountBelongToMC, but in order to avoid any unknown issue, we added this check.
                 if (balanceToken >= qstAmountBelongToMC) {
@@ -715,7 +715,7 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
     /// @param _withUpdate Whether call "massUpdatePools" operation.
     function upkeep(uint256 _amount, uint256 _duration, bool _withUpdate) external onlyReceiver {
         // Transfer qst token from receiver.
-        CAKE.safeTransferFrom(receiver, address(this), _amount);
+        QST.safeTransferFrom(receiver, address(this), _amount);
         // Update qstAmountBelongToMC
         unchecked {
             qstAmountBelongToMC += _amount;
@@ -806,12 +806,12 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
         if (!success) revert();
     }
 
-    /// @notice Safe Transfer CAKE.
-    /// @param _to The CAKE receiver address.
-    /// @param _amount Transfer CAKE amounts.
+    /// @notice Safe Transfer QST.
+    /// @param _to The QST receiver address.
+    /// @param _amount Transfer QST amounts.
     function _safeTransfer(address _to, uint256 _amount) internal {
         if (_amount > 0) {
-            uint256 balance = CAKE.balanceOf(address(this));
+            uint256 balance = QST.balanceOf(address(this));
             if (balance < _amount) {
                 _amount = balance;
             }
@@ -823,7 +823,7 @@ contract MasterChefV3 is INonfungiblePositionManagerStruct, Multicall, Ownable, 
                     qstAmountBelongToMC = balance - _amount;
                 }
             }
-            CAKE.safeTransfer(_to, _amount);
+            QST.safeTransfer(_to, _amount);
         }
     }
 

@@ -119,7 +119,7 @@ _Callable by owner._
 function harvestFromV2() internal
 ```
 
-Harvest pending CAKE tokens from MasterChef V2.
+Harvest pending QST tokens from MasterChef V2.
 
 ### upkeep
 

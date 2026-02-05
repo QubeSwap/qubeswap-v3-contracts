@@ -10,7 +10,7 @@ const abi = [
     inputs: [
       {
         internalType: "contract IERC20",
-        name: "_CAKE",
+        name: "_QST",
         type: "address",
       },
       {
@@ -483,7 +483,7 @@ const abi = [
   },
   {
     inputs: [],
-    name: "CAKE",
+    name: "QST",
     outputs: [
       {
         internalType: "contract IERC20",

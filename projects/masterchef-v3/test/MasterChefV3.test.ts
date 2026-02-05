@@ -214,7 +214,7 @@ describe("MasterChefV3", function () {
     await mineUpTo(firstFarmingBlock + 30 * 24 * 60 * 60);
     await masterChefV2.connect(admin).deposit(1, 0);
     // const qstFarmed = await qstToken.balanceOf(admin.address);
-    // console.log(`${ethers.utils.formatUnits(qstFarmed)} CAKE farmed`);
+    // console.log(`${ethers.utils.formatUnits(qstFarmed)} QST farmed`);
     await qstToken.approve(masterChefV3.address, ethers.constants.MaxUint256);
     await masterChefV3.setReceiver(admin.address);
     await masterChefV3.upkeep(ethers.utils.parseUnits(`${4 * 24 * 60 * 60}`), 24 * 60 * 60, true);

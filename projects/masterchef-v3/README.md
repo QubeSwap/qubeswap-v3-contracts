@@ -71,13 +71,13 @@ mapping(address => uint256) v3PoolAddressPid
 
 v3PoolAddressPid[v3PoolAddress] => pid
 
-### CAKE
+### QST
 
 ```solidity
-IERC20 CAKE
+IERC20 QST
 ```
 
-Address of CAKE contract.
+Address of QST contract.
 
 ### WETH
 
@@ -231,14 +231,14 @@ Record the qst amount belong to
 ### constructor
 
 ```solidity
-constructor(IERC20 _CAKE, INonfungiblePositionManager _nonfungiblePositionManager, address _WETH) public
+constructor(IERC20 _QST, INonfungiblePositionManager _nonfungiblePositionManager, address _WETH) public
 ```
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| _CAKE | IERC20 | The CAKE token contract address. |
+| _QST | IERC20 | The QST token contract address. |
 | _nonfungiblePositionManager | INonfungiblePositionManager | the NFT position manager contract address. |
 | _WETH | address |  |
 
@@ -290,7 +290,7 @@ Returns the qst per second , period end time. This is for liquidity mining pool.
 function pendingQst(uint256 _tokenId) external view returns (uint256 reward)
 ```
 
-View function for checking pending CAKE rewards.
+View function for checking pending QST rewards.
 
 _The pending qst amount is based on the last state in LMPool. The actual amount will happen whenever liquidity changes or harvest._
 
@@ -349,7 +349,7 @@ One v3 pool can only create one pool.
 function set(uint256 _pid, uint256 _allocPoint, bool _withUpdate) external
 ```
 
-Update the given pool's CAKE allocation point. Can only be called by the owner.
+Update the given pool's QST allocation point. Can only be called by the owner.
 
 #### Parameters
 

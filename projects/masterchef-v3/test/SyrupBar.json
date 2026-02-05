@@ -6,7 +6,7 @@
     {
       "inputs": [
         {
-          "internalType": "contract QstToken",
+          "internalType": "contract QubeSwapToken",
           "name": "_qst",
           "type": "address"
         }
@@ -249,7 +249,7 @@
       "name": "qst",
       "outputs": [
         {
-          "internalType": "contract QstToken",
+          "internalType": "contract QubeSwapToken",
           "name": "",
           "type": "address"
         }

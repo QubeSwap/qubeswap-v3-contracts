@@ -13,7 +13,7 @@ import QubeV3LmPoolDeployerArtifact from "@qubeswap/v3-lm-pool/artifacts/contrac
 import TestLiquidityAmountsArtifact from "@qubeswap/v3-periphery/artifacts/contracts/test/LiquidityAmountsTest.sol/LiquidityAmountsTest.json";
 
 import ERC20MockArtifact from "./ERC20Mock.json";
-import QstTokenArtifact from "./QstToken.json";
+import QubeSwapTokenArtifact from "./QubeSwapToken.json";
 import SyrupBarArtifact from "./SyrupBar.json";
 import MasterChefArtifact from "./MasterChef.json";
 import MasterChefV2Artifact from "./MasterChefV2.json";
@@ -80,32 +80,32 @@ describe("MasterChefV3", function () {
     // await qubeV3Factory.setOwner(qubeV3FactoryOwner.address);
 
     // Prepare for master chef v3
-    const QstToken = await ethers.getContractFactoryFromArtifact(QstTokenArtifact);
-    const qstToken = await QstToken.deploy();
+    const QubeSwapToken = await ethers.getContractFactoryFromArtifact(QubeSwapTokenArtifact);
+    const qubeswapToken = await QubeSwapToken.deploy();
 
     const SyrupBar = await ethers.getContractFactoryFromArtifact(SyrupBarArtifact);
-    const syrupBar = await SyrupBar.deploy(qstToken.address);
+    const syrupBar = await SyrupBar.deploy(qubeswapToken.address);
 
     const lpTokenV1 = await ERC20Mock.deploy("LP Token V1", "LPV1");
     const dummyTokenV2 = await ERC20Mock.deploy("Dummy Token V2", "DTV2");
 
     const MasterChef = await ethers.getContractFactoryFromArtifact(MasterChefArtifact);
     const masterChef = await MasterChef.deploy(
-      qstToken.address,
+      qubeswapToken.address,
       syrupBar.address,
       admin.address,
       ethers.utils.parseUnits("40"),
       ethers.constants.Zero
     );
 
-    await qstToken.transferOwnership(masterChef.address);
+    await qubeswapToken.transferOwnership(masterChef.address);
     await syrupBar.transferOwnership(masterChef.address);
 
     await masterChef.add(0, lpTokenV1.address, true); // farm with pid 1 and 0 allocPoint
     await masterChef.add(1, dummyTokenV2.address, true); // farm with pid 2 and 1 allocPoint
 
     const MasterChefV2 = await ethers.getContractFactoryFromArtifact(MasterChefV2Artifact);
-    const masterChefV2 = await MasterChefV2.deploy(masterChef.address, qstToken.address, 2, admin.address);
+    const masterChefV2 = await MasterChefV2.deploy(masterChef.address, qubeswapToken.address, 2, admin.address);
 
     const MockBoost = await ethers.getContractFactoryFromArtifact(MockBoostArtifact);
     const mockBoost = await MockBoost.deploy(masterChefV2.address);
@@ -122,7 +122,7 @@ describe("MasterChefV3", function () {
 
     // Deploy master chef v3
     const MasterChefV3 = await ethers.getContractFactory("MasterChefV3");
-    const masterChefV3 = await MasterChefV3.deploy(qstToken.address, nonfungiblePositionManager.address, WETH9Address);
+    const masterChefV3 = await MasterChefV3.deploy(qubeswapToken.address, nonfungiblePositionManager.address, WETH9Address);
 
     await dummyTokenV3.mint(admin.address, ethers.utils.parseUnits("1000"));
     await dummyTokenV3.approve(masterChefV2.address, ethers.constants.MaxUint256);
@@ -213,9 +213,9 @@ describe("MasterChefV3", function () {
     // Farm 1 month in advance and then upkeep
     await mineUpTo(firstFarmingBlock + 30 * 24 * 60 * 60);
     await masterChefV2.connect(admin).deposit(1, 0);
-    // const qstFarmed = await qstToken.balanceOf(admin.address);
+    // const qstFarmed = await qubeswapToken.balanceOf(admin.address);
     // console.log(`${ethers.utils.formatUnits(qstFarmed)} QST farmed`);
-    await qstToken.approve(masterChefV3.address, ethers.constants.MaxUint256);
+    await qubeswapToken.approve(masterChefV3.address, ethers.constants.MaxUint256);
     await masterChefV3.setReceiver(admin.address);
     await masterChefV3.upkeep(ethers.utils.parseUnits(`${4 * 24 * 60 * 60}`), 24 * 60 * 60, true);
     // console.log(`qstPerSecond: ${ethers.utils.formatUnits((await masterChefV3.latestPeriodQstPerSecond()).div(await masterChefV3.PRECISION()))}\n`);
@@ -227,7 +227,7 @@ describe("MasterChefV3", function () {
     this.masterChefV3 = masterChefV3;
     this.pools = pools;
     this.poolAddresses = poolAddresses;
-    this.qstToken = qstToken;
+    this.qubeswapToken = qubeswapToken;
     this.liquidityAmounts = liquidityAmounts;
     this.swapRouter = qubeV3SwapRouter;
 
@@ -303,7 +303,7 @@ describe("MasterChefV3", function () {
         let qstUser1;
         let qstUser2;
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
 
         console.log("@5 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -331,7 +331,7 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
 
@@ -344,10 +344,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(3));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(3));
 
         console.log("@7 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -376,10 +376,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -395,10 +395,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -412,10 +412,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -429,10 +429,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -446,10 +446,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -463,10 +463,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -489,10 +489,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -508,10 +508,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -527,10 +527,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -558,10 +558,10 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -592,11 +592,11 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -612,11 +612,11 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -632,11 +632,11 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -652,11 +652,11 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -672,11 +672,11 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -692,11 +692,11 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4));
 
@@ -727,11 +727,11 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6));
@@ -763,12 +763,12 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6));
@@ -800,13 +800,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6));
@@ -821,13 +821,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6));
@@ -859,13 +859,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -883,13 +883,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -905,13 +905,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -927,13 +927,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -949,13 +949,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -980,13 +980,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1002,13 +1002,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1038,13 +1038,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1060,13 +1060,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1091,13 +1091,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1115,13 +1115,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1139,13 +1139,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1161,13 +1161,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1197,13 +1197,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1219,13 +1219,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1241,13 +1241,13 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1280,14 +1280,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1305,14 +1305,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1345,14 +1345,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1369,14 +1369,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1393,14 +1393,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1417,14 +1417,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1441,14 +1441,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1465,14 +1465,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1489,14 +1489,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1513,14 +1513,14 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address))
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address))
           .add(await this.masterChefV3.pendingQst(1))
           .add(await this.masterChefV3.pendingQst(2))
           .add(await this.masterChefV3.pendingQst(5))
           .add(await this.masterChefV3.pendingQst(7))
           .add(await this.masterChefV3.pendingQst(8))
           .add(await this.masterChefV3.pendingQst(10));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address))
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address))
           .add(await this.masterChefV3.pendingQst(3))
           .add(await this.masterChefV3.pendingQst(4))
           .add(await this.masterChefV3.pendingQst(6))
@@ -1582,7 +1582,7 @@ describe("MasterChefV3", function () {
         let qstUser1;
         let qstUser2;
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
 
         console.log("@5 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1610,7 +1610,7 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
 
         console.log("@6 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1621,8 +1621,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@7 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1634,8 +1634,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@8 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1647,8 +1647,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@9 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1660,8 +1660,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@10 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1673,8 +1673,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@11 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1686,8 +1686,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@12 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1699,8 +1699,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@13 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1712,8 +1712,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@14 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1725,8 +1725,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@15 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1738,8 +1738,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@16 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1751,8 +1751,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@17 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1764,8 +1764,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@18 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1777,8 +1777,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@19 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1790,8 +1790,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@20 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1803,8 +1803,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@21 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1816,8 +1816,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@22 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1829,8 +1829,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@23 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1842,8 +1842,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@24 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1855,8 +1855,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@25 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1868,8 +1868,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@26 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1881,8 +1881,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@27 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1894,8 +1894,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@28 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1907,8 +1907,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@29 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1920,8 +1920,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@30 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1933,8 +1933,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@31 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1946,8 +1946,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@32 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1959,8 +1959,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@33 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1972,8 +1972,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@34 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1985,8 +1985,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@35 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -1998,8 +1998,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@36 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2011,8 +2011,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@37 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2024,8 +2024,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@38 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2037,8 +2037,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@39 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2050,8 +2050,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@40 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2063,8 +2063,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@41 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2076,8 +2076,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@42 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2089,8 +2089,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@43 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2102,8 +2102,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@44 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2115,8 +2115,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@45 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2128,8 +2128,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@46 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2141,8 +2141,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@47 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2154,8 +2154,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@48 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2167,8 +2167,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@49 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2180,8 +2180,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@50 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2193,8 +2193,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@51 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2206,8 +2206,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@52 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2219,8 +2219,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@53 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2277,7 +2277,7 @@ describe("MasterChefV3", function () {
         let qstUser1;
         let qstUser2;
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
 
         console.log("@5 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2305,7 +2305,7 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
 
         console.log("@6 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2327,8 +2327,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@7 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2349,8 +2349,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@8 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2373,8 +2373,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@9 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2386,8 +2386,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@10 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2399,8 +2399,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@11 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2412,8 +2412,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@12 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2425,8 +2425,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@13 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2438,8 +2438,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@14 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2451,8 +2451,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@15 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2464,8 +2464,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@16 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2477,8 +2477,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@17 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2490,8 +2490,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@18 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2503,8 +2503,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@19 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2527,8 +2527,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@20 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2549,8 +2549,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@21 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2562,8 +2562,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@22 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2575,8 +2575,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@23 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2588,8 +2588,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@24 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2601,8 +2601,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@25 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2614,8 +2614,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@26 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2627,8 +2627,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@27 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2640,8 +2640,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@28 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2653,8 +2653,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@29 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2675,8 +2675,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@30 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2688,8 +2688,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@31 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2701,8 +2701,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@32 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2714,8 +2714,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@33 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2727,8 +2727,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@34 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2740,8 +2740,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@35 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2753,8 +2753,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@36 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2766,8 +2766,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@37 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2779,8 +2779,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@38 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2792,8 +2792,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@39 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2805,8 +2805,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@40 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2818,8 +2818,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@41 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2831,8 +2831,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@42 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2844,8 +2844,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@43 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2857,8 +2857,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@44 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2870,8 +2870,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@45 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2883,8 +2883,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@46 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2896,8 +2896,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@47 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2909,8 +2909,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@48 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2922,8 +2922,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@49 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2935,8 +2935,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@50 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2948,8 +2948,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@51 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2961,8 +2961,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@52 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);
@@ -2974,8 +2974,8 @@ describe("MasterChefV3", function () {
 
         await time.increase(1);
 
-        qstUser1 = (await this.qstToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
-        qstUser2 = (await this.qstToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
+        qstUser1 = (await this.qubeswapToken.balanceOf(user1.address)).add(await this.masterChefV3.pendingQst(1));
+        qstUser2 = (await this.qubeswapToken.balanceOf(user2.address)).add(await this.masterChefV3.pendingQst(2));
 
         console.log("@53 ----------------------------------------");
         console.log(`user1: ${ethers.utils.formatUnits(qstUser1)}`);

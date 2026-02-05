@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "QstToken",
-  "sourceName": "contracts/test/QstToken.sol",
+  "contractName": "QubeSwapToken",
+  "sourceName": "contracts/test/QubeSwapToken.sol",
   "abi": [
     {
       "anonymous": false,

@@ -37,7 +37,6 @@
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@openzeppelin/hardhat-upgrades": "^1.22.1",
     "@qubeswap/v3-core": "*",
-    "@typechain/ethers-v5": "^10.2.0",
 	"@typechain/ethers-v6": "^0.5.1",
     "@types/chai": "^4.2.6",
     "@types/mocha": "^5.2.7",
@@ -64,12 +63,6 @@
     "compile": "hardhat compile",
 	"clean": "rm -rf node_modules",
 	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
-	"flatten_SwapRouter": "npx hardhat flatten contracts/SwapRouter.sol > SwapRouter_flat.sol",
-	"flatten_V3Migrator": "npx hardhat flatten contracts/V3Migrator.sol > V3Migrator_flat.sol",
-	"flatten_TickLens": "npx hardhat flatten contracts/lens/TickLens.sol > TickLens_flat.sol",
-	"flatten_NonfungibleTokenPositionDescriptor": "npx hardhat flatten contracts/NonfungibleTokenPositionDescriptor.sol > NonfungibleTokenPositionDescriptor_flat.sol",
-	"flatten_NonfungiblePositionManager": "npx hardhat flatten contracts/NonfungiblePositionManager.sol > NonfungiblePositionManager_flat.sol",
-	"flatten_QubeInterfaceMulticall": "npx hardhat flatten contracts/lens/QubeInterfaceMulticall.sol > QubeInterfaceMulticall_flat.sol",
     "test": "hardhat test"
   }
 }

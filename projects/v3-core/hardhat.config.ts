@@ -4,7 +4,6 @@ import '@nomiclabs/hardhat-etherscan'
 import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
 import 'hardhat-watcher'
-import 'dotenv/config'
 import 'solidity-docgen'
 import * as dotenv from "dotenv"
 dotenv.config({ path: require("find-config")(".env") })

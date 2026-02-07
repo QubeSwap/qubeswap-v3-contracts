@@ -53,9 +53,7 @@
   "scripts": {
     "compile": "hardhat compile",
 	"clean": "rm -rf node_modules",
-	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
-	"flatten_QubeV3Factory": "npx hardhat flatten contracts/QubeV3Factory.sol > QubeV3Factory_flat.sol",
-	"flatten_QubeV3PoolDeployer": "npx hardhat flatten contracts/QubeV3PoolDeployer.sol > QubeV3PoolDeployer_flat.sol",
+	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache && rm -rf typechain",
     "test": "hardhat test"
   }
 }

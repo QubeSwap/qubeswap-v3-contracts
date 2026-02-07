@@ -81,6 +81,10 @@ const config: HardhatUserConfig = {
       }
     ]
   },
+  typechain: {
+    outDir: 'typechain',
+    target: 'ethers-v6'
+  },
   paths: {
     sources: './contracts/',
     tests: './test',

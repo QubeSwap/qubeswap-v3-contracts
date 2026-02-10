@@ -16,7 +16,8 @@ const config: HardhatUserConfig = {
     hardhat: {},
     localhost: { timeout: 600000 },
     seiMainnet: {
-      url: "https://evm-rpc.sei-apis.com",
+      //url: "https://evm-rpc.sei-apis.com",
+	  url: "https://sei-public.nodies.app",
       accounts: [process.env.KEY_MAINNET!]
     },
 	monadMainnet: {
@@ -32,7 +33,8 @@ const config: HardhatUserConfig = {
       accounts: [process.env.KEY_MAINNET!]
     },
 	avaxMainnet: {
-      url: "https://api.avax.network/ext/bc/C/rpc",
+      //url: "https://api.avax.network/ext/bc/C/rpc",
+	  url: "https://avalanche-c-chain-rpc.publicnode.com",
       accounts: [process.env.KEY_MAINNET!]
     },
   },	

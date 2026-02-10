@@ -6,7 +6,7 @@
   "scripts": {
     "compile": "hardhat compile",
 	"clean": "rm -rf node_modules",
-	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache",
+	"reset": "rm -rf node_modules && rm -rf artifacts && rm -rf typechain-types && rm -rf abi && rm -rf cache && rm -rf typechain",
     "test": "echo 'skip'"
   },
   "devDependencies": {

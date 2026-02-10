@@ -33,8 +33,8 @@ const config: HardhatUserConfig = {
       accounts: [process.env.KEY_MAINNET!]
     },
 	avaxMainnet: {
-      //url: "https://api.avax.network/ext/bc/C/rpc",
-	  url: "https://avalanche-c-chain-rpc.publicnode.com",
+      url: "https://1rpc.io/avax/c",
+	  //url: "https://avalanche-c-chain-rpc.publicnode.com",
       accounts: [process.env.KEY_MAINNET!]
     },
   },	
